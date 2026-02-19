@@ -16,16 +16,56 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signIn } from "@/lib/auth-client";
+import { signIn, signUp } from "@/lib/auth-client";
 
 export default function AuthScreen() {
   const [authFlow, setAuthFlow] = useState<"login" | "signup">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSignInSocial = async () => {
+    setLoading(true);
     await signIn.social({
       provider: "github",
-      callbackURL: "/",
     });
+    setLoading(false);
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (authFlow === "login") {
+      await signIn.email(
+        {
+          email,
+          password,
+          callbackURL: "/",
+        },
+        {
+          onError: (ctx) => {
+            alert(ctx.error.message);
+          },
+        }
+      );
+    } else {
+      await signUp.email(
+        {
+          email,
+          password,
+          name,
+          callbackURL: "/",
+        },
+        {
+          onError: (ctx) => {
+            alert(ctx.error.message);
+          },
+        }
+      );
+    }
+    setLoading(false);
   };
 
   return (
@@ -48,8 +88,8 @@ export default function AuthScreen() {
           </CardAction>
         </CardHeader>
         <CardContent>
-          {authFlow == "login" ? (
-            <form>
+          <form id="auth-form" onSubmit={handleEmailAuth}>
+            {authFlow == "login" ? (
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
@@ -58,6 +98,8 @@ export default function AuthScreen() {
                     type="email"
                     placeholder="m@example.com"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -69,13 +111,24 @@ export default function AuthScreen() {
                     type="password"
                     required
                     placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
               </div>
-            </form>
-          ) : (
-            <form>
+            ) : (
               <div className="flex flex-col gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Your Name"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -83,6 +136,8 @@ export default function AuthScreen() {
                     type="email"
                     placeholder="m@example.com"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -92,26 +147,33 @@ export default function AuthScreen() {
                     type="password"
                     required
                     placeholder="Password"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    required
-                    placeholder="Confirm Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
               </div>
-            </form>
-          )}
+            )}
+          </form>
         </CardContent>
         <CardFooter className="flex-col gap-2">
-          <Button type="submit" className="w-full">
-            {authFlow === "login" ? "Login" : "Sign up"}
+          <Button
+            type="submit"
+            form="auth-form"
+            className="w-full"
+            disabled={loading}
+          >
+            {loading
+              ? "Loading..."
+              : authFlow === "login"
+                ? "Login"
+                : "Sign up"}
           </Button>
-          <Button variant="outline" className="w-full">
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleSignInSocial}
+            disabled={loading}
+          >
             <FaGithub />
             {authFlow === "login" ? "Login" : "Sign up"} with Github
           </Button>
