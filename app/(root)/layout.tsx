@@ -1,10 +1,10 @@
-import { AppSidebar } from "@/components/app-sidebar";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import AuthGuard from "@/modules/auth/components/auth-guard";
+import { AppSidebar } from "@/modules/dashboard/components/app-sidebar";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
