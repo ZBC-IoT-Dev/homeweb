@@ -1,5 +1,7 @@
+import DashboardView from "@/modules/dashboard/views/dashboard-view";
+
 const Page = () => {
-  return <div></div>;
+  return <DashboardView />;
 };
 
 export default Page;
